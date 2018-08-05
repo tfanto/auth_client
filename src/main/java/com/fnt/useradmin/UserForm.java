@@ -2,7 +2,6 @@ package com.fnt.useradmin;
 
 import java.util.List;
 
-import com.fnt.customer.CustomerList;
 import com.fnt.dto.UserDto;
 import com.fnt.sys.RestResponse;
 import com.vaadin.data.BeanValidationBinder;
@@ -43,13 +42,13 @@ public class UserForm extends Window {
 		this.crudFunction = crudFunction;
 		String captionStr = "";
 		switch (crudFunction) {
-		case CustomerList.CRUD_CREATE:
+		case UserList.CRUD_CREATE:
 			captionStr = "Create";
 			break;
-		case CustomerList.CRUD_EDIT:
+		case UserList.CRUD_EDIT:
 			captionStr = "Edit";
 			break;
-		case CustomerList.CRUD_DELETE:
+		case UserList.CRUD_DELETE:
 			captionStr = "Delete";
 			btn_save.setCaption("Confirm delete");
 			break;
@@ -117,7 +116,7 @@ public class UserForm extends Window {
 				binder.writeBean(user);
 				RestResponse<UserDto> rs = null;
 				switch (crudFunction) {
-				case CustomerList.CRUD_CREATE:
+				case UserList.CRUD_CREATE:
 					user.clearRoles();
 					if (chkAdmin.getValue()) {
 						user.addRole("ADMIN");
@@ -130,7 +129,7 @@ public class UserForm extends Window {
 					}
 					rs = userRepository.create(user);
 					break;
-				case CustomerList.CRUD_EDIT:
+				case UserList.CRUD_EDIT:
 					user.clearRoles();
 					if (chkAdmin.getValue()) {
 						user.addRole("ADMIN");
@@ -143,7 +142,7 @@ public class UserForm extends Window {
 					}
 					rs = userRepository.update(user);
 					break;
-				case CustomerList.CRUD_DELETE:
+				case UserList.CRUD_DELETE:
 					// here all rules will be removed anyway
 					rs = userRepository.delete(user);
 					break;
