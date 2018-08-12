@@ -20,7 +20,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 @SuppressWarnings("serial")
 @PushStateNavigation
-public class VaadinUI extends UI {
+public class LoginUI extends UI {
 
 	@Override
 	protected void init(VaadinRequest request) {
@@ -78,7 +78,7 @@ public class VaadinUI extends UI {
 	}
 
 	@WebServlet(urlPatterns = "/*", name = "VaadinUIServlet", asyncSupported = true)
-	@VaadinServletConfiguration(ui = VaadinUI.class, productionMode = false)
+	@VaadinServletConfiguration(ui = LoginUI.class, productionMode = false)
 	public static class VaadinUIServlet extends VaadinServlet {
 	}
 
