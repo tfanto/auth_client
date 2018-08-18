@@ -1,5 +1,6 @@
 package com.fnt.useradmin;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -42,6 +45,14 @@ public class UserRepository {
 		return client;
 	}
 
+	private ObjectMapper getMapper() {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		return mapper;
+
+	}
+
 	public RestResponse<List<UserDto>> search() {
 		Client client = null;
 		try {
@@ -60,7 +71,7 @@ public class UserRepository {
 				});
 				return new RestResponse<>(status, theList);
 			} else if (status == 403) {
-				return new RestResponse<>(status, new ArrayList<>());  // dont tell the the user why he could be evil
+				return new RestResponse<>(status, new ArrayList<>()); // dont tell the the user why he could be evil
 			} else {
 				return new RestResponse<>(status, new ArrayList<>());
 			}
@@ -85,9 +96,16 @@ public class UserRepository {
 			// @formatter:on
 			int status = response.getStatus();
 			if (status == 200) {
-				UserDto theList = response.readEntity(new GenericType<UserDto>() {
-				});
-				return new RestResponse<>(status, theList);
+				String json = response.readEntity(String.class);
+				UserDto user;
+				try {
+					user = getMapper().readValue(json, UserDto.class);
+					return new RestResponse<>(status, user);
+				} catch ( IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					return null;
+				}
 			} else if (status == 403) {
 				return new RestResponse<>(status, response.getStatusInfo().toString());
 			} else {
@@ -134,6 +152,7 @@ public class UserRepository {
 
 	public RestResponse<UserDto> update(UserDto user) {
 		Client client = null;
+		user.setLastlogin(null);
 		try {
 			client = createClient();
 			// @formatter:off
@@ -188,6 +207,7 @@ public class UserRepository {
 			if (client != null) {
 				client.close();
 			}
-		}	}
+		}
+	}
 
 }

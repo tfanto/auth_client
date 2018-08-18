@@ -91,8 +91,16 @@ public class UserList extends Composite implements View {
 	}
 
 	private Object showRemoveWindow() {
-		UserForm window = new UserForm(this, userRepository, "Delete", grid.asSingleSelect().getValue(), CRUD_DELETE);
-		getUI().addWindow(window);
+		SingleSelect<UserDto> selected = grid.asSingleSelect();
+		String login = selected.getValue().getLogin();
+		RestResponse<UserDto> fetched = userRepository.getLogin(login);
+		if (fetched.getStatus().equals(200)) {
+			UserDto dto = fetched.getEntity();
+			UserForm window = new UserForm(this, userRepository, "Delete", dto, CRUD_DELETE);
+			getUI().addWindow(window);
+		} else {
+			Notification.show("ERROR", fetched.getMsg(), Notification.Type.ERROR_MESSAGE);
+		}
 		return null;
 	}
 

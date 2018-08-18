@@ -1,5 +1,7 @@
 package com.fnt.useradmin;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 import com.fnt.dto.UserDto;
@@ -11,6 +13,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.DateField;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Notification;
@@ -30,6 +33,9 @@ public class UserForm extends Window {
 	private CheckBox chkAdmin = new CheckBox("Admin");
 	private CheckBox chkUser = new CheckBox("User");
 	private CheckBox chkGuest = new CheckBox("Guest");
+	private CheckBox chkConfirmed = new CheckBox("Confirmed");
+	private CheckBox chkBlocked = new CheckBox("Blocked");
+	private DateField lastChanged = new DateField();
 
 	private Button btn_cancel = new Button("Cancel");
 	private Button btn_save = new Button("Ok", VaadinIcons.CHECK);
@@ -41,9 +47,15 @@ public class UserForm extends Window {
 		this.userRepository = userRepository;
 		this.crudFunction = crudFunction;
 		String captionStr = "";
+		login.setEnabled(false);
+		lastChanged.setEnabled(false);
 		switch (crudFunction) {
 		case UserList.CRUD_CREATE:
+			login.setEnabled(true);
 			captionStr = "Create";
+			chkConfirmed.setValue(false);
+			chkBlocked.setValue(false);
+			lastChanged.setValue(LocalDate.now(ZoneId.of("UTC")));
 			break;
 		case UserList.CRUD_EDIT:
 			captionStr = "Edit";
@@ -59,7 +71,8 @@ public class UserForm extends Window {
 	}
 
 	private void initLayout(String captionStr) {
-		setCaption(captionStr);
+		// setCaption(captionStr);
+		setResizable(false);
 
 		btn_save.addStyleName(ValoTheme.BUTTON_PRIMARY);
 
@@ -71,7 +84,7 @@ public class UserForm extends Window {
 		VerticalLayout checkBoxes = new VerticalLayout();
 		checkBoxes.addComponents(chkAdmin, chkUser, chkGuest);
 
-		GridLayout formLayout = new GridLayout(2, 1, login, checkBoxes);
+		GridLayout formLayout = new GridLayout(1, 5, login, checkBoxes, chkConfirmed, chkBlocked, lastChanged);
 		formLayout.setMargin(true);
 		formLayout.setSpacing(true);
 
@@ -108,6 +121,16 @@ public class UserForm extends Window {
 			chkGuest.setValue(false);
 		}
 
+		if (crudFunction == 1) {
+			chkBlocked.setValue(false);
+			chkConfirmed.setValue(false);
+			lastChanged.setValue(LocalDate.now(ZoneId.of("UTC")));
+		} else {
+			chkBlocked.setValue(user.getBlocked());
+			chkConfirmed.setValue(user.getConfirmed());
+			lastChanged.setValue(user.getLastlogin().toLocalDate());
+		}
+
 		btn_cancel.addClickListener(e -> close());
 		btn_save.addClickListener(e -> {
 			try {
@@ -127,6 +150,8 @@ public class UserForm extends Window {
 					if (chkGuest.getValue()) {
 						user.addRole("GUEST");
 					}
+					user.setBlocked(chkBlocked.getValue());
+					user.setConfirmed(chkConfirmed.getValue());
 					rs = userRepository.create(user);
 					break;
 				case UserList.CRUD_EDIT:
@@ -140,6 +165,8 @@ public class UserForm extends Window {
 					if (chkGuest.getValue()) {
 						user.addRole("GUEST");
 					}
+					user.setBlocked(chkBlocked.getValue());
+					user.setConfirmed(chkConfirmed.getValue());
 					rs = userRepository.update(user);
 					break;
 				case UserList.CRUD_DELETE:
