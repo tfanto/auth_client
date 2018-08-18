@@ -3,7 +3,12 @@ package com.fnt.useradmin;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -122,6 +127,13 @@ public class UserRepository {
 
 	public RestResponse<UserDto> create(UserDto user) {
 		Client client = null;
+		
+		
+		List<String> errors = validate(user);
+		if(errors.size() > 0) {
+			return new RestResponse<>(403, errors.get(0));			
+		}
+		
 		try {
 			client = createClient();
 			// @formatter:off
@@ -209,5 +221,20 @@ public class UserRepository {
 			}
 		}
 	}
+	
+	public <T> List<String> validate(T e) {
+
+		List<String> ret = new ArrayList<>();
+
+		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+		Validator validator = factory.getValidator();
+		Set<ConstraintViolation<T>> errors = validator.validate(e);
+		for (ConstraintViolation<T> error : errors) {
+			String msg = error.getMessage();
+			ret.add(msg);
+		}
+		return ret;
+	}
+
 
 }

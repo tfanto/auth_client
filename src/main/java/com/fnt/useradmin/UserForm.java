@@ -152,6 +152,7 @@ public class UserForm extends Window {
 					}
 					user.setBlocked(chkBlocked.getValue());
 					user.setConfirmed(chkConfirmed.getValue());
+
 					rs = userRepository.create(user);
 					break;
 				case UserList.CRUD_EDIT:
