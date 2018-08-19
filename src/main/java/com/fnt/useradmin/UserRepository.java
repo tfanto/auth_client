@@ -3,7 +3,12 @@ package com.fnt.useradmin;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -12,21 +17,19 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ContextResolver;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fnt.dto.UserDto;
 import com.fnt.sys.Fnc;
 import com.fnt.sys.RestResponse;
+import com.vaadin.server.VaadinServlet;
 import com.vaadin.server.VaadinSession;
 
 public class UserRepository {
 
-	private static final String REST_USER_END_POINT = "http://localhost:8080/auth/rest/user";
-	private static final String JWE = "jwe";
+	private static final String REST_USER_END_POINT = String.valueOf(VaadinServlet.getCurrent().getServletContext().getAttribute("REST_USER_END_POINT"));
 
 	private Fnc fnc = new Fnc();
 
@@ -101,7 +104,7 @@ public class UserRepository {
 				try {
 					user = getMapper().readValue(json, UserDto.class);
 					return new RestResponse<>(status, user);
-				} catch ( IOException e) {
+				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 					return null;
@@ -122,6 +125,12 @@ public class UserRepository {
 
 	public RestResponse<UserDto> create(UserDto user) {
 		Client client = null;
+
+		List<String> errors = validate(user);
+		if (errors.size() > 0) {
+			return new RestResponse<>(403, errors.get(0));
+		}
+
 		try {
 			client = createClient();
 			// @formatter:off
@@ -208,6 +217,20 @@ public class UserRepository {
 				client.close();
 			}
 		}
+	}
+
+	public <T> List<String> validate(T e) {
+
+		List<String> ret = new ArrayList<>();
+
+		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+		Validator validator = factory.getValidator();
+		Set<ConstraintViolation<T>> errors = validator.validate(e);
+		for (ConstraintViolation<T> error : errors) {
+			String msg = error.getMessage();
+			ret.add(msg);
+		}
+		return ret;
 	}
 
 }

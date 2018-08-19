@@ -10,12 +10,12 @@ import com.vaadin.ui.PasswordField;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 
-public class AppLoginForm extends Composite implements View {
+public class AppAuthLoginForm extends Composite implements View {
 
 	private static final long serialVersionUID = 1L;
 
 	public interface LoginListener {
-		void logInClicked(AppLoginForm loginForm);
+		void logInClicked(AppAuthLoginForm loginForm);
 	}
 
 	private TextField username;
@@ -26,12 +26,12 @@ public class AppLoginForm extends Composite implements View {
 	private String loginButtonCaption = "Log in";
 
 	@SuppressWarnings("serial")
-	public AppLoginForm() {
+	public AppAuthLoginForm() {
 		LoginForm loginForm = new LoginForm() {
 			@Override
 			protected Component createContent(TextField username, PasswordField password, Button loginButton) {
-				AppLoginForm.this.username = username;
-				AppLoginForm.this.password = password;
+				AppAuthLoginForm.this.username = username;
+				AppAuthLoginForm.this.password = password;
 
 				username.setCaption(null);
 				password.setCaption(null);
@@ -69,7 +69,7 @@ public class AppLoginForm extends Composite implements View {
 	}
 
 	private void logInClicked(LoginForm.LoginEvent loginEvent) {
-		boolean ok = AppLoginRepository.authenticate(username.getValue(), password.getValue());
+		boolean ok = AppAuthLoginRepository.authenticate(username.getValue(), password.getValue());
 		if(!ok) {
 			Notification.show("Bad credentials", Notification.Type.ERROR_MESSAGE);			
 		}

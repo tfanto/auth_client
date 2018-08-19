@@ -2,8 +2,8 @@ package com.fnt.ui;
 
 import javax.servlet.annotation.WebServlet;
 
-import com.fnt.authentication.AppLoginForm;
-import com.fnt.authentication.AppLoginRepository;
+import com.fnt.authentication.AppAuthLoginForm;
+import com.fnt.authentication.AppAuthLoginRepository;
 import com.fnt.useradmin.UserList;
 import com.vaadin.annotations.VaadinServletConfiguration;
 import com.vaadin.navigator.Navigator;
@@ -48,10 +48,10 @@ public class LoginUI extends UI {
 
 		Navigator navigator = new Navigator(this, viewContainer);
 		navigator.addView("", DefaultView.class);
-		navigator.addView("login", AppLoginForm.class);
+		navigator.addView("login", AppAuthLoginForm.class);
 		navigator.addView("userlist", UserList.class);
 
-		if (!AppLoginRepository.isAuthenticated()) {
+		if (!AppAuthLoginRepository.isAuthenticated()) {
 			btnUserAdmin.setVisible(false);
 			btnLogout.setVisible(false);
 			navigator.navigateTo("login");
@@ -64,7 +64,7 @@ public class LoginUI extends UI {
 			@Override
 			public boolean beforeViewChange(ViewChangeEvent event) {
 
-				if (AppLoginRepository.isAuthenticated()) {
+				if (AppAuthLoginRepository.isAuthenticated()) {
 					return true;
 				}
 				return false;
@@ -73,7 +73,7 @@ public class LoginUI extends UI {
 	}
 
 	private Object logout() {
-		AppLoginRepository.logout();
+		AppAuthLoginRepository.logout();
 		return null;
 	}
 
